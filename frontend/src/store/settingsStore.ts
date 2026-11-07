@@ -2,8 +2,10 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import type { CountryCode, MarketCode } from "../types/markets";
+import type { LocalePreference } from "../i18n/types";
 
 export type DisplayCurrency = "INR" | "USD";
+export type { LocalePreference };
 export type RealtimeMode = "polling" | "ws";
 export type ThemeVariant = "terminal-noir" | "classic-bloomberg" | "light-desk" | "custom";
 export type RecentSecurityAssetClass = "equity" | "fno" | "crypto" | "commodity" | "forex" | "etf" | "mf";
@@ -85,6 +87,7 @@ type SettingsState = {
   customAccentColor: string;
   hudOverlayEnabled: boolean;
   tickerTapeVisible: boolean;
+  localePreference: LocalePreference;
   recentSecurities: RecentSecurity[];
   setSelectedCountry: (country: CountryCode) => void;
   setSelectedMarket: (market: MarketCode) => void;
@@ -96,6 +99,7 @@ type SettingsState = {
   setCustomAccentColor: (value: string) => void;
   setHudOverlayEnabled: (enabled: boolean) => void;
   setTickerTapeVisible: (value: boolean) => void;
+  setLocalePreference: (value: LocalePreference) => void;
   addRecentSecurity: (security: RecentSecurity) => void;
   clearRecentSecurities: () => void;
 };
@@ -135,6 +139,7 @@ export const useSettingsStore = create<SettingsState>()(
       customAccentColor: "#FF6B00",
       hudOverlayEnabled: false,
       tickerTapeVisible: true,
+      localePreference: "system",
       recentSecurities: [],
       setSelectedCountry: (country) => {
         const defaults = countryDefaults[country];
@@ -156,6 +161,10 @@ export const useSettingsStore = create<SettingsState>()(
         }),
       setHudOverlayEnabled: (enabled) => set({ hudOverlayEnabled: enabled }),
       setTickerTapeVisible: (value) => set({ tickerTapeVisible: value }),
+      setLocalePreference: (value) =>
+        set({
+          localePreference: value === "en" || value === "zh" || value === "system" ? value : "system",
+        }),
       addRecentSecurity: (security) =>
         set((state) => {
           const next = sanitizeRecentSecurity(security);
@@ -207,6 +216,12 @@ export const useSettingsStore = create<SettingsState>()(
             typeof persisted.tickerTapeVisible === "boolean"
               ? persisted.tickerTapeVisible
               : current.tickerTapeVisible,
+          localePreference:
+            persisted.localePreference === "en" ||
+            persisted.localePreference === "zh" ||
+            persisted.localePreference === "system"
+              ? persisted.localePreference
+              : current.localePreference,
           recentSecurities: sanitizeRecentSecurities((persisted as Partial<SettingsState>).recentSecurities),
         };
       },

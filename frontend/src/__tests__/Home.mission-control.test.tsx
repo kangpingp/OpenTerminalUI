@@ -12,8 +12,8 @@ vi.mock("../hooks/useStocks", () => ({
 }));
 
 vi.mock("../store/settingsStore", () => ({
-  useSettingsStore: (selector: (state: { selectedMarket: string }) => unknown) =>
-    selector({ selectedMarket: "NSE" }),
+  useSettingsStore: (selector: (state: { selectedMarket: string; localePreference: string }) => unknown) =>
+    selector({ selectedMarket: "NSE", localePreference: "en" }),
 }));
 
 vi.mock("../realtime/useQuotesStream", () => ({

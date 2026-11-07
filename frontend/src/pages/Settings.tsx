@@ -11,6 +11,8 @@ import { APIKeyManager } from "../components/settings/APIKeyManager";
 import { DataProvidersPanel } from "../components/settings/DataProvidersPanel";
 import { ErrorBoundary } from "../components/common/ErrorBoundary";
 import { useSettingsStore } from "../store/settingsStore";
+import type { LocalePreference } from "../store/settingsStore";
+import { useI18n } from "../i18n/useI18n";
 import { COUNTRY_MARKETS } from "../types";
 import type { AlertRule, CountryCode, MarketCode } from "../types";
 import type { ThemeVariant } from "../store/settingsStore";
@@ -43,6 +45,9 @@ export function SettingsPage() {
   const setNewsAutoRefresh = useSettingsStore((s) => s.setNewsAutoRefresh);
   const setNewsRefreshSec = useSettingsStore((s) => s.setNewsRefreshSec);
   const setThemeVariant = useSettingsStore((s) => s.setThemeVariant);
+  const localePreference = useSettingsStore((s) => s.localePreference);
+  const setLocalePreference = useSettingsStore((s) => s.setLocalePreference);
+  const { t } = useI18n();
 
   const [searchParams] = useSearchParams();
   const providersRef = useRef<HTMLDivElement | null>(null);
@@ -86,13 +91,26 @@ export function SettingsPage() {
   return (
     <div className="space-y-3 p-3">
       <div ref={providersRef}>
-        <TerminalPanel title="Data Providers" subtitle="What is live, what is missing, and what a key unlocks">
+        <TerminalPanel title={t("settings.dataProviders")} subtitle={t("settings.dataProvidersSub")}>
           <DataProvidersPanel />
         </TerminalPanel>
       </div>
 
-      <TerminalPanel title="UI Settings" subtitle="Dense terminal defaults">
+      <TerminalPanel title={t("settings.uiSettings")} subtitle={t("settings.uiSettingsSub")}>
         <div className="grid grid-cols-1 gap-2 lg:grid-cols-6">
+          <label className="flex flex-col gap-1 text-[11px] uppercase tracking-[0.12em] text-terminal-muted lg:col-span-1">
+            <span>{t("settings.language")}</span>
+            <TerminalInput
+              as="select"
+              aria-label={t("settings.language")}
+              value={localePreference}
+              onChange={(e) => setLocalePreference(e.target.value as LocalePreference)}
+            >
+              <option value="system">{t("settings.languageSystem")}</option>
+              <option value="en">{t("settings.languageEn")}</option>
+              <option value="zh">{t("settings.languageZh")}</option>
+            </TerminalInput>
+          </label>
           <TerminalInput as="select" value={selectedCountry} onChange={(e) => setSelectedCountry(e.target.value as CountryCode)}>
             <option value="IN">IN</option>
             <option value="US">US</option>
@@ -126,11 +144,11 @@ export function SettingsPage() {
         </div>
       </TerminalPanel>
 
-      <TerminalPanel title="Appearance">
+      <TerminalPanel title={t("settings.appearance")}>
         <div className="mb-4 flex flex-wrap items-center gap-4 text-sm">
-          <label>Density <select aria-label="Density" className="bg-terminal-bg p-2" value={density} onChange={(e) => setDensity(e.target.value as "compact" | "comfortable")}><option value="comfortable">Comfortable</option><option value="compact">Compact</option></select></label>
-          <label>Text size <select aria-label="Text size" className="bg-terminal-bg p-2" value={textScale} onChange={(e) => setTextScale(Number(e.target.value))}>{[0.9, 1, 1.15, 1.25, 1.4].map((scale) => <option key={scale} value={scale}>{Math.round(scale * 100)}%</option>)}</select></label>
-          <label className="flex items-center gap-2"><input type="checkbox" checked={terminalEffects} onChange={(e) => setTerminalEffects(e.target.checked)} />Decorative scanlines and vignette</label>
+          <label>{t("settings.density")} <select aria-label={t("settings.density")} className="bg-terminal-bg p-2" value={density} onChange={(e) => setDensity(e.target.value as "compact" | "comfortable")}><option value="comfortable">{t("settings.densityComfortable")}</option><option value="compact">{t("settings.densityCompact")}</option></select></label>
+          <label>{t("settings.textSize")} <select aria-label={t("settings.textSize")} className="bg-terminal-bg p-2" value={textScale} onChange={(e) => setTextScale(Number(e.target.value))}>{[0.9, 1, 1.15, 1.25, 1.4].map((scale) => <option key={scale} value={scale}>{Math.round(scale * 100)}%</option>)}</select></label>
+          <label className="flex items-center gap-2"><input type="checkbox" checked={terminalEffects} onChange={(e) => setTerminalEffects(e.target.checked)} />{t("settings.terminalEffects")}</label>
         </div>
         <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
           <TerminalInput as="select" value={themeVariant} onChange={(e) => setThemeVariant(e.target.value as ThemeVariant)}>
@@ -155,7 +173,7 @@ export function SettingsPage() {
                 checked={hudOverlayEnabled}
                 onChange={(e) => setHudOverlayEnabled(e.target.checked)}
               />
-              <span className="text-terminal-muted">HUD overlay</span>
+              <span className="text-terminal-muted">{t("settings.hudOverlay")}</span>
             </label>
           </div>
           <div className="flex items-center gap-2 rounded border border-terminal-border bg-terminal-bg px-2 py-1.5">
@@ -165,13 +183,13 @@ export function SettingsPage() {
                 checked={tickerTapeVisible}
                 onChange={(e) => setTickerTapeVisible(e.target.checked)}
               />
-              <span className="text-terminal-muted">Show ticker tape</span>
+              <span className="text-terminal-muted">{t("settings.tickerTape")}</span>
             </label>
           </div>
         </div>
       </TerminalPanel>
 
-      <TerminalPanel title="Create Alert">
+      <TerminalPanel title={t("settings.createAlert")}>
         <div className="grid grid-cols-1 gap-2 lg:grid-cols-6">
           <TerminalInput value={ticker} onChange={(e) => setTicker(e.target.value.toUpperCase())} />
           <TerminalInput as="select" value={alertType} onChange={(e) => setAlertType(e.target.value)}>
@@ -205,7 +223,7 @@ export function SettingsPage() {
 
       {error && <div className="rounded-sm border border-terminal-neg bg-terminal-neg/10 p-2 text-xs text-terminal-neg">{error}</div>}
 
-      <TerminalPanel title={`Alert Rules (${(alerts || []).length})`}>
+      <TerminalPanel title={t("settings.alertRules", { count: (alerts || []).length })}>
         <TerminalTable
           rows={alerts || []}
           rowKey={(row) => String(row?.id || Math.random())}
@@ -240,7 +258,7 @@ export function SettingsPage() {
         />
       </TerminalPanel>
 
-      <TerminalPanel title="Scheduled Reports">
+      <TerminalPanel title={t("settings.scheduledReports")}>
         <div className="grid grid-cols-1 gap-2 lg:grid-cols-5">
           <TerminalInput value={reportType} onChange={(e) => setReportType(e.target.value)} placeholder="report type" />
           <TerminalInput as="select" value={frequency} onChange={(e) => setFrequency(e.target.value)}>
@@ -288,7 +306,7 @@ export function SettingsPage() {
         </div>
       </TerminalPanel>
 
-      <TerminalPanel title="Data Export">
+      <TerminalPanel title={t("settings.dataExport")}>
         <div className="flex flex-wrap gap-2">
           {["watchlist", "positions", "trades", "screening_results", "backtest_trades"].map((kind) => (
             <div key={kind} className="flex items-center gap-1 rounded border border-terminal-border bg-terminal-bg px-2 py-1">
@@ -314,7 +332,7 @@ export function SettingsPage() {
         </div>
       </TerminalPanel>
 
-      <TerminalPanel title="Backtest Data">
+      <TerminalPanel title={t("settings.backtestData")}>
         <ErrorBoundary>
           <DataManager />
         </ErrorBoundary>

@@ -32,6 +32,7 @@ import { fetchChainSummary } from "../fno/api/fnoApi";
 import { fetchCollectionBriefing } from "../api/client";
 import { loadStoredProfileCompletion } from "../lib/profileCompletion";
 import { useSettingsStore } from "../store/settingsStore";
+import { useI18n } from "../i18n/useI18n";
 import type { PortfolioItem } from "../types";
 import { getWorkspacePresetConfig, readWorkspacePreset } from "../workspace/presets";
 
@@ -59,6 +60,7 @@ type DashboardSnapshot = {
 };
 
 type NavCard = {
+  id: string;
   label: string;
   to: string;
   badge: string;
@@ -71,86 +73,86 @@ const NAV_CARD_SECTIONS: Array<{ title: string; cards: NavCard[] }> = [
   {
     title: "MARKETS",
     cards: [
-      { label: "Equity", to: "/equity/stocks", badge: "M1" },
-      { label: "F&O", to: "/fno", badge: "FO" },
-      { label: "Crypto", to: "/equity/crypto", badge: "CR" },
-      { label: "Economics", to: "/equity/economics", badge: "EC" },
-      { label: "Yield Curve", to: "/equity/yield-curve", badge: "YC" },
-      { label: "Rotation", to: "/equity/sector-rotation", badge: "ROT" },
-      { label: "Heatmap", to: "/equity/heatmap", badge: "HM" },
+      { id: "equity", label: "Equity", to: "/equity/stocks", badge: "M1" },
+      { id: "fno", label: "F&O", to: "/fno", badge: "FO" },
+      { id: "crypto", label: "Crypto", to: "/equity/crypto", badge: "CR" },
+      { id: "economics", label: "Economics", to: "/equity/economics", badge: "EC" },
+      { id: "yield-curve", label: "Yield Curve", to: "/equity/yield-curve", badge: "YC" },
+      { id: "rotation", label: "Rotation", to: "/equity/sector-rotation", badge: "ROT" },
+      { id: "heatmap", label: "Heatmap", to: "/equity/heatmap", badge: "HM" },
     ],
   },
   {
     title: "DERIVATIVES",
     cards: [
-      { label: "Option Chain", to: "/fno", badge: "OC" },
-      { label: "Greeks", to: "/fno/greeks", badge: "GR" },
-      { label: "Futures", to: "/fno/futures", badge: "FUT" },
-      { label: "OI Analysis", to: "/fno/oi", badge: "OI" },
-      { label: "Strategy", to: "/fno/strategy", badge: "STR" },
-      { label: "PCR", to: "/fno/pcr", badge: "PCR" },
-      { label: "Options Flow", to: "/fno/flow", badge: "FLW" },
-      { label: "F&O Heatmap", to: "/fno/heatmap", badge: "FHM" },
-      { label: "Expiry", to: "/fno/expiry", badge: "EXP" },
+      { id: "option-chain", label: "Option Chain", to: "/fno", badge: "OC" },
+      { id: "greeks", label: "Greeks", to: "/fno/greeks", badge: "GR" },
+      { id: "futures", label: "Futures", to: "/fno/futures", badge: "FUT" },
+      { id: "oi", label: "OI Analysis", to: "/fno/oi", badge: "OI" },
+      { id: "strategy", label: "Strategy", to: "/fno/strategy", badge: "STR" },
+      { id: "pcr", label: "PCR", to: "/fno/pcr", badge: "PCR" },
+      { id: "flow", label: "Options Flow", to: "/fno/flow", badge: "FLW" },
+      { id: "fno-heatmap", label: "F&O Heatmap", to: "/fno/heatmap", badge: "FHM" },
+      { id: "expiry", label: "Expiry", to: "/fno/expiry", badge: "EXP" },
     ],
   },
   {
     title: "RESEARCH",
     cards: [
-      { label: "Security Hub", to: "/equity/security", badge: "SH" },
-      { label: "Screener", to: "/equity/screener", badge: "F2" },
-      { label: "Saved Views", to: "/equity/saved-views", badge: "SV" },
-      { label: "Factors", to: "/equity/factors", badge: "FAC" },
-      { label: "Alpha Zoo", to: "/equity/alpha-zoo", badge: "AZ" },
-      { label: "Strategy Export", to: "/equity/strategy-export", badge: "SE" },
-      { label: "Intelligence", to: "/equity/intelligence-timeline", badge: "INT" },
-      { label: "Hotlists", to: "/equity/hotlists", badge: "HOT" },
-      { label: "Insider", to: "/equity/insider", badge: "INS" },
-      { label: "Compare", to: "/equity/compare", badge: "CMP" },
+      { id: "security-hub", label: "Security Hub", to: "/equity/security", badge: "SH" },
+      { id: "screener", label: "Screener", to: "/equity/screener", badge: "F2" },
+      { id: "saved-views", label: "Saved Views", to: "/equity/saved-views", badge: "SV" },
+      { id: "factors", label: "Factors", to: "/equity/factors", badge: "FAC" },
+      { id: "alpha-zoo", label: "Alpha Zoo", to: "/equity/alpha-zoo", badge: "AZ" },
+      { id: "strategy-export", label: "Strategy Export", to: "/equity/strategy-export", badge: "SE" },
+      { id: "intelligence", label: "Intelligence", to: "/equity/intelligence-timeline", badge: "INT" },
+      { id: "hotlists", label: "Hotlists", to: "/equity/hotlists", badge: "HOT" },
+      { id: "insider", label: "Insider", to: "/equity/insider", badge: "INS" },
+      { id: "compare", label: "Compare", to: "/equity/compare", badge: "CMP" },
     ],
   },
   {
     title: "LABS",
     cards: [
-      { label: "Backtesting", to: "/backtesting", badge: "F9" },
-      { label: "Model Lab", to: "/backtesting/model-lab", badge: "ML" },
-      { label: "Portfolio Lab", to: "/equity/portfolio/lab", badge: "PL" },
-      { label: "Model Compare", to: "/backtesting/model-lab/compare", badge: "MC" },
-      { label: "Blends", to: "/equity/portfolio/lab/blends", badge: "BL" },
-      { label: "Stat Lab", to: "/equity/stat-lab", badge: "SL" },
+      { id: "backtesting", label: "Backtesting", to: "/backtesting", badge: "F9" },
+      { id: "model-lab", label: "Model Lab", to: "/backtesting/model-lab", badge: "ML" },
+      { id: "portfolio-lab", label: "Portfolio Lab", to: "/equity/portfolio/lab", badge: "PL" },
+      { id: "model-compare", label: "Model Compare", to: "/backtesting/model-lab/compare", badge: "MC" },
+      { id: "blends", label: "Blends", to: "/equity/portfolio/lab/blends", badge: "BL" },
+      { id: "stat-lab", label: "Stat Lab", to: "/equity/stat-lab", badge: "SL" },
     ],
   },
   {
     title: "PORTFOLIO",
     cards: [
-      { label: "Holdings", to: "/equity/portfolio", badge: "F3" },
-      { label: "Risk Desk", to: "/equity/risk", badge: "RSK" },
-      { label: "Correlation", to: "/equity/correlation", badge: "COR" },
-      { label: "Paper", to: "/equity/paper", badge: "PP" },
-      { label: "Dividends", to: "/equity/dividends", badge: "DIV" },
-      { label: "Mutual Funds", to: "/equity/mutual-funds", badge: "MF" },
-      { label: "ETF Analytics", to: "/equity/etf-analytics", badge: "ETF" },
+      { id: "holdings", label: "Holdings", to: "/equity/portfolio", badge: "F3" },
+      { id: "risk", label: "Risk Desk", to: "/equity/risk", badge: "RSK" },
+      { id: "correlation", label: "Correlation", to: "/equity/correlation", badge: "COR" },
+      { id: "paper", label: "Paper", to: "/equity/paper", badge: "PP" },
+      { id: "dividends", label: "Dividends", to: "/equity/dividends", badge: "DIV" },
+      { id: "mutual-funds", label: "Mutual Funds", to: "/equity/mutual-funds", badge: "MF" },
+      { id: "etf", label: "ETF Analytics", to: "/equity/etf-analytics", badge: "ETF" },
     ],
   },
   {
     title: "INTEL",
     cards: [
-      { label: "News", to: "/equity/news", badge: "NW" },
-      { label: "Alerts", to: "/equity/alerts", badge: "AL" },
-      { label: "Watchlist", to: "/equity/watchlist", badge: "F4" },
-      { label: "Relative Str", to: "/equity/rs", badge: "RS" },
-      { label: "Data Quality", to: "/equity/data-quality", badge: "DQ" },
+      { id: "news", label: "News", to: "/equity/news", badge: "NW" },
+      { id: "alerts", label: "Alerts", to: "/equity/alerts", badge: "AL" },
+      { id: "watchlist", label: "Watchlist", to: "/equity/watchlist", badge: "F4" },
+      { id: "rs", label: "Relative Str", to: "/equity/rs", badge: "RS" },
+      { id: "data-quality", label: "Data Quality", to: "/equity/data-quality", badge: "DQ" },
     ],
   },
   {
     title: "WORKSPACE",
     cards: [
-      { label: "Launchpad", to: "/equity/launchpad", badge: "LP" },
-      { label: "Workstation", to: "/equity/chart-workstation", badge: "WS" },
-      { label: "Cockpit", to: "/equity/cockpit", badge: "CP" },
-      { label: "Plugins", to: "/equity/plugins", badge: "PLG" },
-      { label: "Settings", to: "/equity/settings", badge: "F6" },
-      { label: "Account", to: "/account", badge: "ACC" },
+      { id: "launchpad", label: "Launchpad", to: "/equity/launchpad", badge: "LP" },
+      { id: "workstation", label: "Workstation", to: "/equity/chart-workstation", badge: "WS" },
+      { id: "cockpit", label: "Cockpit", to: "/equity/cockpit", badge: "CP" },
+      { id: "plugins", label: "Plugins", to: "/equity/plugins", badge: "PLG" },
+      { id: "settings", label: "Settings", to: "/equity/settings", badge: "F6" },
+      { id: "account", label: "Account", to: "/account", badge: "ACC" },
     ],
   },
 ];
@@ -241,6 +243,7 @@ function getSentimentClass(label?: string): string {
 export function HomePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   const selectedMarket = useSettingsStore((s) => s.selectedMarket);
   const ideasMarket = marketFromDesk(selectedMarket);
   const displayCurrency = useSettingsStore((s) => s.displayCurrency);
@@ -545,24 +548,26 @@ export function HomePage() {
   const launchSections = useMemo<QuickNavSection[]>(
     () => {
       const preferred = new Set(presetConfig.quickLinks.map((link) => link.to));
-      return NAV_CARD_SECTIONS.map((section) => ({
+      return NAV_CARD_SECTIONS.map((section) => {
+        const title = t(`home.nav.${section.title}`);
+        return {
         id: slugify(section.title),
-        title: section.title,
+        title,
         // Show ALL nav cards — the workspace preset only reorders (preferred first),
         // it must never hide features from the launcher.
         items: section.cards
           .slice()
           .sort((a, b) => Number(preferred.has(b.to)) - Number(preferred.has(a.to)))
           .map((card) => ({
-          id: `${slugify(section.title)}-${slugify(card.label)}`,
-          label: card.label,
+          id: `${slugify(section.title)}-${card.id}`,
+          label: t(`home.card.${card.id}`),
           shortcut: card.badge,
-          description: `${section.title} desk access`,
+          description: t("home.deskAccess", { section: title }),
           onSelect: () => navigate(card.to),
         })),
-      })).filter((section) => section.items.length > 0);
+      };}).filter((section) => section.items.length > 0);
     },
-    [navigate, presetConfig.quickLinks],
+    [navigate, presetConfig.quickLinks, t],
   );
 
   const updatedLabel = snapshot.updatedAt
@@ -576,36 +581,36 @@ export function HomePage() {
     () => [
       {
         id: "auth",
-        label: "AUTH",
-        value: user ? `${user.role.toUpperCase()} READY` : "GUEST",
+        label: t("home.auth"),
+        value: user ? t("home.ready", { role: user.role.toUpperCase() }) : t("home.guest"),
         tone: user ? "ok" : "warning",
       },
       {
         id: "relay",
-        label: "RELAY",
+        label: t("home.relayLabel"),
         value: `${selectedMarket} ${realtimeMode.toUpperCase()}`,
         tone: realtimeMode === "ws" ? "ok" : "info",
       },
       {
         id: "snapshot",
-        label: "SNAPSHOT",
+        label: t("home.snapshot"),
         value: updatedLabel,
         tone: snapshot.updatedAt ? "stale" : "offline",
       },
       {
         id: "news",
-        label: "NEWS",
-        value: newsAutoRefresh ? `AUTO ${newsRefreshSec}s` : "MANUAL",
+        label: t("home.newsLabel"),
+        value: newsAutoRefresh ? t("home.auto", { sec: newsRefreshSec }) : t("home.manual"),
         tone: newsAutoRefresh ? "info" : "neutral",
       },
       {
         id: "fno",
-        label: "F&O",
+        label: t("home.fnoLabel"),
         value: `${snapshot.fnoSignal}${snapshot.fnoPcr != null ? ` | ${snapshot.fnoPcr.toFixed(2)}` : ""}`,
         tone: getSystemTone(snapshot.fnoSignal),
       },
     ],
-    [newsAutoRefresh, newsRefreshSec, realtimeMode, selectedMarket, snapshot.fnoPcr, snapshot.fnoSignal, snapshot.updatedAt, updatedLabel, user],
+    [newsAutoRefresh, newsRefreshSec, realtimeMode, selectedMarket, snapshot.fnoPcr, snapshot.fnoSignal, snapshot.updatedAt, updatedLabel, user, t],
   );
 
   const leadHeadline = newsLog[0] ?? null;
@@ -616,12 +621,12 @@ export function HomePage() {
       hideTickerLoader
       showMobileBottomNav
       showWorkspaceControls={false}
-      statusBarTickerOverride="MISSION CONTROL"
+      statusBarTickerOverride={t("home.statusOverride")}
     >
       <div className="relative min-h-full bg-terminal-bg">
         {initializing ? (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-terminal-bg/95" role="status" aria-live="polite">
-            <p className="ot-type-panel-title uppercase tracking-[0.18em] text-terminal-accent">Initializing Mission Control</p>
+            <p className="ot-type-panel-title uppercase tracking-[0.18em] text-terminal-accent">{t("home.initializing")}</p>
             <div className="h-1.5 w-64 overflow-hidden rounded-full border border-terminal-border bg-terminal-panel/80">
               <span className="block h-full w-2/3 animate-pulse bg-terminal-accent/80" />
             </div>
@@ -629,30 +634,30 @@ export function HomePage() {
         ) : null}
 
         {!initializing ? (
-          <main className="flex min-h-full flex-col gap-3 p-3 md:p-4" aria-label="Mission Control Dashboard">
-            <section className="rounded-sm border border-terminal-border bg-terminal-panel/80 p-3" aria-label="Home Header">
+          <main className="flex min-h-full flex-col gap-3 p-3 md:p-4" aria-label={t("home.missionAria")}>
+            <section className="rounded-sm border border-terminal-border bg-terminal-panel/80 p-3" aria-label={t("home.headerAria")}>
               <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                 <div className="space-y-2">
-                  <p className="ot-type-panel-title uppercase tracking-[0.18em] text-terminal-accent">Mission Control</p>
+                  <p className="ot-type-panel-title uppercase tracking-[0.18em] text-terminal-accent">{t("home.missionControl")}</p>
                   <h1 className="text-2xl font-semibold uppercase tracking-[0.12em] text-terminal-text">{presetConfig.landing.headline}</h1>
                   <p className="max-w-3xl text-sm text-terminal-muted">
                     {presetConfig.landing.description}
                   </p>
                   <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.12em] text-terminal-muted">
                     <span className="rounded-sm border border-terminal-border px-2 py-1">
-                      Desk {(user?.email || "unknown").toUpperCase()}
+                      {t("home.desk")} {(user?.email || "unknown").toUpperCase()}
                     </span>
                     <span className="rounded-sm border border-terminal-border px-2 py-1">
-                      Market {selectedMarket}
+                      {t("home.market")} {selectedMarket}
                     </span>
                     <span className="rounded-sm border border-terminal-accent/60 px-2 py-1 text-terminal-accent">
-                      Preset {presetConfig.label}
+                      {t("home.preset")} {presetConfig.label}
                     </span>
                     <span className="rounded-sm border border-terminal-border px-2 py-1">
-                      Currency {displayCurrency}
+                      {t("home.currency")} {displayCurrency}
                     </span>
                     <span className="rounded-sm border border-terminal-border px-2 py-1">
-                      Refresh {newsAutoRefresh ? `${newsRefreshSec}s` : "Manual"}
+                      {t("home.refresh")} {newsAutoRefresh ? `${newsRefreshSec}s` : t("home.refreshManual")}
                     </span>
                   </div>
                 </div>
@@ -665,7 +670,7 @@ export function HomePage() {
                       className="rounded-sm border border-terminal-border px-3 py-1.5 text-[11px] uppercase tracking-[0.12em] text-terminal-muted hover:border-terminal-accent hover:text-terminal-accent"
                       onClick={() => navigate("/equity/portfolio")}
                     >
-                      Portfolio HQ
+                      {t("home.portfolioHq")}
                     </button>
                     <button
                       type="button"
@@ -679,14 +684,14 @@ export function HomePage() {
                       className="rounded-sm border border-terminal-border px-3 py-1.5 text-[11px] uppercase tracking-[0.12em] text-terminal-muted hover:border-terminal-accent hover:text-terminal-accent"
                       onClick={() => navigate("/equity/launchpad")}
                     >
-                      Launchpad
+                      {t("home.launchpad")}
                     </button>
                     <button
                       type="button"
                       className="rounded-sm border border-terminal-border px-3 py-1.5 text-[11px] uppercase tracking-[0.12em] text-terminal-muted hover:border-terminal-accent hover:text-terminal-accent"
                       onClick={() => navigate("/equity/news")}
                     >
-                      Intel Wire
+                      {t("home.intelWire")}
                     </button>
                   </div>
                 </div>
@@ -694,7 +699,7 @@ export function HomePage() {
 
               <div className="mt-3">
                 <MarketHeatStrip
-                  ariaLabel="Market heat strip"
+                  ariaLabel={t("home.marketHeatAria")}
                   items={heatItems}
                   selectedItemId={selectedHeatId}
                   formatValue={(value) => (typeof value === "number" ? formatPrice(value) : "--")}
@@ -705,31 +710,31 @@ export function HomePage() {
 
             <div className="grid grid-cols-1">
               <AiInsightCard
-                title="AI Market Outlook"
-                description="AI assessment of global market themes and regime"
+                title={t("home.aiOutlook")}
+                description={t("home.aiOutlookSub")}
                 fetcher={() => fetchCollectionBriefing(MARKET_PULSE_SYMBOLS, "global markets")}
               />
             </div>
 
-            <section className="rounded-sm border border-terminal-border bg-terminal-panel/80 p-3" aria-label="Ideas radar">
+            <section className="rounded-sm border border-terminal-border bg-terminal-panel/80 p-3" aria-label={t("home.ideasRadar")}>
               <div className="mb-3">
-                <h2 className="ot-type-panel-title uppercase tracking-[0.14em] text-terminal-accent">Ideas Radar</h2>
+                <h2 className="ot-type-panel-title uppercase tracking-[0.14em] text-terminal-accent">{t("home.ideasRadar")}</h2>
                 <p className="mt-1 text-sm text-terminal-muted">
-                  Quick hits from the ideas board in the {ideasMarket} desk.
+                  {t("home.ideasRadarSub", { market: ideasMarket })}
                 </p>
               </div>
               <IdeasRadar market={ideasMarket} />
             </section>
 
             {showHomeSection("portfolio") || showHomeSection("health") || showHomeSection("news") ? (
-            <section className="grid gap-3 xl:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]" aria-label="Portfolio HQ">
+            <section className="grid gap-3 xl:grid-cols-[minmax(0,1.85fr)_minmax(0,1fr)]" aria-label={t("home.portfolioHq")}>
               {showHomeSection("portfolio") ? (
               <div className="rounded-sm border border-terminal-border bg-terminal-panel/80 p-3">
                 <div className="flex flex-col gap-3 border-b border-terminal-border pb-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <h2 className="ot-type-panel-title uppercase tracking-[0.14em] text-terminal-accent">Portfolio HQ</h2>
+                    <h2 className="ot-type-panel-title uppercase tracking-[0.14em] text-terminal-accent">{t("home.portfolioHq")}</h2>
                     <p className="mt-1 text-sm text-terminal-muted">
-                      Equity valuation, derivatives posture, and performance telemetry anchored to the current home snapshot.
+                      {t("home.portfolioHqSub")}
                     </p>
                   </div>
                   <ProfileCompletionRing
@@ -741,7 +746,7 @@ export function HomePage() {
 
                 <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
                   <MetricCard
-                    label="Net Liquidation"
+                    label={t("home.netLiquidation")}
                     value={formatInr(snapshot.equityValue)}
                     tone={getMetricTone(snapshot.equityPnl)}
                     delta={
@@ -753,13 +758,13 @@ export function HomePage() {
                           }
                     }
                     details={[
-                      { label: "Holdings", value: String(snapshot.holdingsCount) },
-                      { label: "Watchlist", value: String(snapshot.watchlistCount), tone: "accent" },
-                      { label: "Backtests", value: String(snapshot.backtestPresetCount) },
-                      { label: "Sync", value: updatedLabel, tone: "neutral" },
+                      { label: t("home.holdings"), value: String(snapshot.holdingsCount) },
+                      { label: t("home.watchlist"), value: String(snapshot.watchlistCount), tone: "accent" },
+                      { label: t("home.backtests"), value: String(snapshot.backtestPresetCount) },
+                      { label: t("home.sync"), value: updatedLabel, tone: "neutral" },
                     ]}
                     sparklinePoints={performancePoints}
-                    sparklineAriaLabel="Net liquidation trend"
+                    sparklineAriaLabel={t("home.netLiquidation")}
                     footer={
                       <div className="flex flex-wrap gap-2">
                         <button
@@ -767,14 +772,14 @@ export function HomePage() {
                           className="rounded-sm border border-terminal-border px-2 py-1 text-[11px] uppercase tracking-[0.12em] text-terminal-muted hover:border-terminal-accent hover:text-terminal-accent"
                           onClick={() => navigate("/equity/portfolio")}
                         >
-                          Open Portfolio
+                          {t("home.openPortfolio")}
                         </button>
                         <button
                           type="button"
                           className="rounded-sm border border-terminal-border px-2 py-1 text-[11px] uppercase tracking-[0.12em] text-terminal-muted hover:border-terminal-accent hover:text-terminal-accent"
                           onClick={() => navigate("/backtesting")}
                         >
-                          Run Backtests
+                          {t("home.runBacktests")}
                         </button>
                       </div>
                     }
@@ -782,7 +787,7 @@ export function HomePage() {
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <MetricCard
-                      label="Market Focus"
+                      label={t("home.marketFocus")}
                       value={focusedMarket?.ltp && focusedMarket.ltp > 0 ? formatPrice(focusedMarket.ltp) : "--"}
                       tone={getMetricTone(focusedMarket?.chg ?? null)}
                       delta={
@@ -797,14 +802,14 @@ export function HomePage() {
                           : undefined
                       }
                       details={[
-                        { label: "Ticker", value: focusedMarket?.label || "--" },
-                        { label: "Desk", value: selectedMarket, tone: "accent" },
+                        { label: t("home.ticker"), value: focusedMarket?.label || "--" },
+                        { label: t("home.deskLabel"), value: selectedMarket, tone: "accent" },
                       ]}
                     />
 
                     <MetricCard
-                      label="F&O Regime"
-                      value={snapshot.fnoSignal === "NA" ? "NO DATA" : snapshot.fnoSignal}
+                      label={t("home.fnoRegime")}
+                      value={snapshot.fnoSignal === "NA" ? t("home.noData") : snapshot.fnoSignal}
                       tone={getSignalTone(snapshot.fnoSignal)}
                       details={[
                         {
@@ -813,37 +818,37 @@ export function HomePage() {
                           tone: getSignalTone(snapshot.fnoSignal),
                         },
                         {
-                          label: "Spot",
+                          label: t("home.spot"),
                           value: snapshot.fnoSpot != null ? formatPrice(snapshot.fnoSpot) : "—",
                         },
                       ]}
                     />
 
                     <MetricCard
-                      label="Watchlist Radar"
-                      value={`${snapshot.watchlistCount} Symbols`}
+                      label={t("home.watchlistRadar")}
+                      value={t("home.symbols", { count: snapshot.watchlistCount })}
                       tone={snapshot.watchlistCount > 0 ? "accent" : "neutral"}
                       delta={{
-                        label: `${snapshot.watchlistDerivativesCount} F&O linked`,
+                        label: t("home.fnoLinked", { count: snapshot.watchlistDerivativesCount }),
                         tone: snapshot.watchlistDerivativesCount > 0 ? "up" : "neutral",
                       }}
                       details={[
-                        { label: "Derivatives", value: String(snapshot.watchlistDerivativesCount) },
-                        { label: "Relay", value: realtimeMode.toUpperCase() },
+                        { label: t("home.derivatives"), value: String(snapshot.watchlistDerivativesCount) },
+                        { label: t("home.relay"), value: realtimeMode.toUpperCase() },
                       ]}
                     />
 
                     <MetricCard
-                      label="Research Queue"
-                      value={`${newsLog.length} Headlines`}
+                      label={t("home.researchQueue")}
+                      value={t("home.headlinesCount", { count: newsLog.length })}
                       tone={leadHeadline?.sentiment?.label === "Bearish" ? "down" : leadHeadline ? "accent" : "neutral"}
                       delta={{
-                        label: newsAutoRefresh ? `Auto refresh ${newsRefreshSec}s` : "Manual news sync",
+                        label: newsAutoRefresh ? t("home.autoRefresh", { sec: newsRefreshSec }) : t("home.manualNews"),
                         tone: newsAutoRefresh ? "accent" : "neutral",
                       }}
                       details={[
-                        { label: "Lead Source", value: leadHeadline?.source || "--" },
-                        { label: "Headlines", value: String(newsLog.length) },
+                        { label: t("home.leadSource"), value: leadHeadline?.source || "--" },
+                        { label: t("home.headlines"), value: String(newsLog.length) },
                       ]}
                     />
                   </div>
@@ -852,19 +857,19 @@ export function HomePage() {
                 <div className="mt-3 rounded-sm border border-terminal-border bg-terminal-bg/40 p-3">
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <h3 className="ot-type-panel-title uppercase tracking-[0.14em] text-terminal-accent">30D Performance</h3>
+                      <h3 className="ot-type-panel-title uppercase tracking-[0.14em] text-terminal-accent">{t("home.perf30d")}</h3>
                       <p className="mt-1 text-xs text-terminal-muted">
-                        Portfolio trajectory normalized against the benchmark overlay from the portfolio analytics feed.
+                        {t("home.perf30dSub")}
                       </p>
                     </div>
                     <span className="rounded-sm border border-terminal-border px-2 py-1 text-[11px] uppercase tracking-[0.12em] text-terminal-muted">
-                      Synced {updatedLabel}
+                      {t("home.synced", { time: updatedLabel })}
                     </span>
                   </div>
                   <PortfolioMiniChart
                     points={performanceSeries}
                     benchmarkPoints={benchmarkSeries}
-                    ariaLabel="Portfolio HQ chart"
+                    ariaLabel={t("home.portfolioChartAria")}
                     valueFormatter={(value) => formatInr(value)}
                   />
                 </div>
@@ -874,21 +879,21 @@ export function HomePage() {
               {showHomeSection("health") || showHomeSection("news") ? (
               <div className="space-y-3">
                 {showHomeSection("health") ? (
-                <section className="rounded-sm border border-terminal-border bg-terminal-panel/80 p-3" aria-label="System Health">
+                <section className="rounded-sm border border-terminal-border bg-terminal-panel/80 p-3" aria-label={t("home.systemHealth")}>
                   <div className="mb-3">
-                    <h2 className="ot-type-panel-title uppercase tracking-[0.14em] text-terminal-accent">System Health</h2>
+                    <h2 className="ot-type-panel-title uppercase tracking-[0.14em] text-terminal-accent">{t("home.systemHealth")}</h2>
                     <p className="mt-1 text-sm text-terminal-muted">
-                      Auth, relay mode, news cadence, and derivatives signal surfaced as a single mission-control rail.
+                      {t("home.systemHealthSub")}
                     </p>
                   </div>
-                  <SystemHealthBar ariaLabel="System health indicators" items={systemHealthItems} />
+                  <SystemHealthBar ariaLabel={t("home.healthAria")} items={systemHealthItems} />
                   <div className="mt-3 grid gap-2 text-xs text-terminal-muted sm:grid-cols-2">
                     <div className="rounded-sm border border-terminal-border bg-terminal-bg/40 px-2 py-2">
-                      <span className="block text-[11px] uppercase tracking-[0.12em]">Focus Asset</span>
+                      <span className="block text-[11px] uppercase tracking-[0.12em]">{t("home.focusAsset")}</span>
                       <span className="mt-1 block text-sm text-terminal-text">{focusedMarket?.label || "--"}</span>
                     </div>
                     <div className="rounded-sm border border-terminal-border bg-terminal-bg/40 px-2 py-2">
-                      <span className="block text-[11px] uppercase tracking-[0.12em]">Desk Mode</span>
+                      <span className="block text-[11px] uppercase tracking-[0.12em]">{t("home.deskMode")}</span>
                       <span className="mt-1 block text-sm text-terminal-text">
                         {selectedMarket} / {displayCurrency}
                       </span>
@@ -898,12 +903,12 @@ export function HomePage() {
                 ) : null}
 
                 {showHomeSection("news") ? (
-                <section className="rounded-sm border border-terminal-border bg-terminal-panel/80 p-3" aria-label="Intel Wire">
+                <section className="rounded-sm border border-terminal-border bg-terminal-panel/80 p-3" aria-label={t("home.intelWire")}>
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <h2 className="ot-type-panel-title uppercase tracking-[0.14em] text-terminal-accent">Intel Wire</h2>
+                      <h2 className="ot-type-panel-title uppercase tracking-[0.14em] text-terminal-accent">{t("home.intelWire")}</h2>
                       <p className="mt-1 text-sm text-terminal-muted">
-                        Latest headlines from the existing news polling loop with sentiment carried through from the API payload.
+                        {t("home.intelWireSub")}
                       </p>
                     </div>
                     <button
@@ -911,12 +916,12 @@ export function HomePage() {
                       className="rounded-sm border border-terminal-border px-2 py-1 text-[11px] uppercase tracking-[0.12em] text-terminal-muted hover:border-terminal-accent hover:text-terminal-accent"
                       onClick={() => navigate("/equity/news")}
                     >
-                      Open News
+                      {t("home.openNews")}
                     </button>
                   </div>
 
                   {newsLog.length > 0 ? (
-                    <ol className="space-y-2" role="list" aria-label="Latest headlines">
+                    <ol className="space-y-2" role="list" aria-label={t("home.latestHeadlines")}>
                       {newsLog.slice(0, 5).map((entry) => (
                         <li key={String(entry.id)} className="rounded-sm border border-terminal-border bg-terminal-bg/40 p-2">
                           <a
@@ -968,7 +973,7 @@ export function HomePage() {
             ) : null}
 
             {showHomeSection("results") || showHomeSection("heatmap") || showHomeSection("timeline") ? (
-            <section className="grid gap-3 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]" aria-label="Dashboard Intelligence">
+            <section className="grid gap-3 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]" aria-label={t("home.dashboardIntel")}>
               <div className="space-y-3">
                 {showHomeSection("results") ? <ResultsSummaryCards
                   results={dashboardResults}
@@ -996,12 +1001,12 @@ export function HomePage() {
             ) : null}
 
             {showHomeSection("launch") ? (
-            <section className="rounded-sm border border-terminal-border bg-terminal-panel/80 p-3" aria-label="Launch Matrix">
+            <section className="rounded-sm border border-terminal-border bg-terminal-panel/80 p-3" aria-label={t("home.launchMatrix")}>
               <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h2 className="ot-type-panel-title uppercase tracking-[0.14em] text-terminal-accent">Launch Matrix</h2>
+                  <h2 className="ot-type-panel-title uppercase tracking-[0.14em] text-terminal-accent">{t("home.launchMatrix")}</h2>
                   <p className="mt-1 text-sm text-terminal-muted">
-                    Dense function-key style routing into equity, derivatives, research, and settings workspaces.
+                    {t("home.launchMatrixSub")}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -1010,18 +1015,18 @@ export function HomePage() {
                     className="rounded-sm border border-terminal-border px-2 py-1 text-[11px] uppercase tracking-[0.12em] text-terminal-muted hover:border-terminal-accent hover:text-terminal-accent"
                     onClick={() => navigate("/equity/chart-workstation")}
                   >
-                    Open Workstation
+                    {t("home.openWorkstation")}
                   </button>
                   <button
                     type="button"
                     className="rounded-sm border border-terminal-border px-2 py-1 text-[11px] uppercase tracking-[0.12em] text-terminal-muted hover:border-terminal-accent hover:text-terminal-accent"
                     onClick={() => navigate("/equity/screener")}
                   >
-                    Open Screener
+                    {t("home.openScreener")}
                   </button>
                 </div>
               </div>
-              <QuickNavGrid ariaLabel="Launch matrix" sections={launchSections} columnCount={4} />
+              <QuickNavGrid ariaLabel={t("home.launchMatrixAria")} sections={launchSections} columnCount={4} />
             </section>
             ) : null}
           </main>
