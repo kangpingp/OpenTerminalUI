@@ -9,6 +9,7 @@ import { inferRecentSecurityAssetClass, inferRecentSecurityMarket, useRecentSecu
 import { useMarketStatus, useTopBarTickers } from "../../hooks/useStocks";
 import { useQuotesStore } from "../../realtime/useQuotesStream";
 import { useSettingsStore } from "../../store/settingsStore";
+import { useI18n } from "../../i18n/useI18n";
 import { useStockStore } from "../../store/stockStore";
 import { COUNTRY_MARKETS } from "../../types";
 import type { CountryCode, MarketCode } from "../../types";
@@ -46,6 +47,7 @@ export function TopBar({ hideTickerLoader = false, hideMarketMarquee = false }: 
   const setSelectedCountry = useSettingsStore((s) => s.selectedCountry === "IN" ? s.setSelectedCountry : s.setSelectedCountry); // keep store reactive
   const setSelectedMarket = useSettingsStore((s) => s.setSelectedMarket);
   const setDisplayCurrency = useSettingsStore((s) => s.setDisplayCurrency);
+  const { t } = useI18n();
   const { addRecent } = useRecentSecurities();
   const { breadcrumbs } = useNavigationHistory({ autoTrack: true });
 
@@ -288,26 +290,26 @@ export function TopBar({ hideTickerLoader = false, hideMarketMarquee = false }: 
           <Link
             to="/"
             className="inline-flex h-7 items-center rounded border border-terminal-border bg-terminal-panel px-1.5"
-            aria-label="OpenTerminalUI Home"
-            title="Home"
+            aria-label={t("topbar.brandHome")}
+            title={t("topbar.homeTitle")}
           >
             <img src={BRAND_ICON_SRC} alt="OpenTerminalUI" className="h-5 w-5 object-contain" />
           </Link>
-          <nav className="flex shrink-0 items-center gap-2" aria-label="Main navigation">
-            <Link className="rounded border border-terminal-border px-2 py-1 text-[11px] text-terminal-muted hover:text-terminal-text" to="/" title="Home">
-              HOME
+          <nav className="flex shrink-0 items-center gap-2" aria-label={t("nav.main")}>
+            <Link className="rounded border border-terminal-border px-2 py-1 text-[11px] text-terminal-muted hover:text-terminal-text" to="/" title={t("topbar.homeTitle")}>
+              {t("topbar.home")}
             </Link>
-            <Link className="rounded border border-terminal-border px-2 py-1 text-[11px] text-terminal-muted hover:text-terminal-text" to="/equity/screener" title="Equity Screener">
-              SCREENER
+            <Link className="rounded border border-terminal-border px-2 py-1 text-[11px] text-terminal-muted hover:text-terminal-text" to="/equity/screener" title={t("topbar.screenerTitle")}>
+              {t("topbar.screener")}
             </Link>
-            <Link className="rounded border border-terminal-border px-2 py-1 text-[11px] text-terminal-muted hover:text-terminal-text" to="/equity/compare" title="Compare Stocks">
-              COMPARE
+            <Link className="rounded border border-terminal-border px-2 py-1 text-[11px] text-terminal-muted hover:text-terminal-text" to="/equity/compare" title={t("topbar.compareTitle")}>
+              {t("topbar.compare")}
             </Link>
-            <Link className="rounded border border-terminal-border px-2 py-1 text-[11px] text-terminal-muted hover:text-terminal-text" to={`/fno/heatmap?symbol=${encodeURIComponent(safeTicker)}`} title="Greeks Heatmap">
-              HEATMAP
+            <Link className="rounded border border-terminal-border px-2 py-1 text-[11px] text-terminal-muted hover:text-terminal-text" to={`/fno/heatmap?symbol=${encodeURIComponent(safeTicker)}`} title={t("topbar.heatmapTitle")}>
+              {t("topbar.heatmap")}
             </Link>
-            <Link className="rounded border border-terminal-border px-2 py-1 text-[11px] text-terminal-muted hover:text-terminal-text" to={`/fno?symbol=${encodeURIComponent(safeTicker)}`} title="F&O Options Chain">
-              F&O <span aria-hidden="true">→</span>
+            <Link className="rounded border border-terminal-border px-2 py-1 text-[11px] text-terminal-muted hover:text-terminal-text" to={`/fno?symbol=${encodeURIComponent(safeTicker)}`} title={t("topbar.fnoTitle")}>
+              {t("topbar.fno")} <span aria-hidden="true">→</span>
             </Link>
           </nav>
         {!hideTickerLoader ? (
@@ -344,7 +346,7 @@ export function TopBar({ hideTickerLoader = false, hideMarketMarquee = false }: 
                   setIsSuggestionsOpen(false);
                 }
               }}
-              aria-label={`Search ${selectedMarket} symbol`}
+              aria-label={t("topbar.searchAria", { market: selectedMarket })}
               aria-autocomplete="list"
               aria-controls="symbol-search-results"
               aria-expanded={isSuggestionsOpen}
@@ -406,7 +408,7 @@ export function TopBar({ hideTickerLoader = false, hideMarketMarquee = false }: 
         <Link
           to="/"
           className="inline-flex h-7 shrink-0 items-center border-l border-terminal-border pl-2"
-          aria-label="OpenTerminalUI Home (Top Right)"
+          aria-label={t("topbar.brandHome")}
           title="OpenTerminalUI"
         >
           <img src={BRAND_ICON_SRC} alt="OpenTerminalUI" className="h-5 w-5 object-contain" />

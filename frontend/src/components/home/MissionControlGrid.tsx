@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useMarketStatus } from "../../hooks/useStocks";
 import { useQuotesStore, useQuotesStream } from "../../realtime/useQuotesStream";
 import { useSettingsStore } from "../../store/settingsStore";
+import { useI18n } from "../../i18n/useI18n";
 import { MissionControlPanel } from "./MissionControlPanel";
 
 type MarketCell = {
@@ -29,6 +30,7 @@ function pctClass(value: number | null | undefined): string {
 }
 
 export function MissionControlGrid() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const selectedMarket = useSettingsStore((s) => s.selectedMarket);
   const { data: marketStatus } = useMarketStatus();
@@ -61,7 +63,7 @@ export function MissionControlGrid() {
 
   return (
     <div className="grid grid-cols-1 gap-3 p-3 md:grid-cols-2 xl:grid-cols-3">
-      <MissionControlPanel title="Market Pulse" accent={marketOpen ? "pos" : "neg"}>
+      <MissionControlPanel title={t("mc.marketPulse")} accent={marketOpen ? "pos" : "neg"}>
         <div className="space-y-2">
           {marketRows.map((row) => (
             <div key={row.key} className="grid grid-cols-[1fr_auto_auto] items-center gap-2 rounded-sm border border-terminal-border/80 px-2 py-1.5">
@@ -75,48 +77,48 @@ export function MissionControlGrid() {
         </div>
       </MissionControlPanel>
 
-      <MissionControlPanel title="Launch Matrix">
+      <MissionControlPanel title={t("mc.launchMatrix")}>
         <div className="grid grid-cols-2 gap-2">
           <button type="button" className="rounded-sm border border-terminal-border px-2 py-2 text-xs text-terminal-text hover:border-terminal-accent" onClick={() => navigate("/equity/stocks")}>
-            Equity Market
+            {t("mc.equityMarket")}
           </button>
           <button type="button" className="rounded-sm border border-terminal-border px-2 py-2 text-xs text-terminal-text hover:border-terminal-accent" onClick={() => navigate("/equity/screener")}>
-            Screener
+            {t("mc.screener")}
           </button>
           <button type="button" className="rounded-sm border border-terminal-border px-2 py-2 text-xs text-terminal-text hover:border-terminal-accent" onClick={() => navigate("/equity/factors")}>
-            Factors
+            {t("mc.factors")}
           </button>
           <button type="button" className="rounded-sm border border-terminal-border px-2 py-2 text-xs text-terminal-text hover:border-terminal-accent" onClick={() => navigate("/equity/alpha-zoo")}>
-            Alpha Zoo
+            {t("mc.alphaZoo")}
           </button>
           <button type="button" className="rounded-sm border border-terminal-border px-2 py-2 text-xs text-terminal-text hover:border-terminal-accent" onClick={() => navigate("/equity/research-autopilot")}>
-            Research Autopilot
+            {t("mc.researchAutopilot")}
           </button>
           <button type="button" className="rounded-sm border border-terminal-border px-2 py-2 text-xs text-terminal-text hover:border-terminal-accent" onClick={() => navigate("/equity/strategy-export")}>
-            Strategy Export
+            {t("mc.strategyExport")}
           </button>
           <button type="button" className="rounded-sm border border-terminal-border px-2 py-2 text-xs text-terminal-text hover:border-terminal-accent" onClick={() => navigate("/equity/intelligence-timeline")}>
-            Intelligence
+            {t("mc.intelligence")}
           </button>
           <button type="button" className="rounded-sm border border-terminal-border px-2 py-2 text-xs text-terminal-text hover:border-terminal-accent" onClick={() => navigate("/equity/saved-views")}>
-            Saved Views
+            {t("mc.savedViews")}
           </button>
           <button type="button" className="rounded-sm border border-terminal-border px-2 py-2 text-xs text-terminal-text hover:border-terminal-accent" onClick={() => navigate("/equity/portfolio")}>
-            Portfolio
+            {t("mc.portfolio")}
           </button>
           <button type="button" className="rounded-sm border border-terminal-border px-2 py-2 text-xs text-terminal-text hover:border-terminal-accent" onClick={() => navigate("/equity/shadow-account")}>
-            Shadow Account
+            {t("mc.shadowAccount")}
           </button>
           <button type="button" className="rounded-sm border border-terminal-border px-2 py-2 text-xs text-terminal-text hover:border-terminal-accent" onClick={() => navigate("/backtesting")}>
-            Backtesting
+            {t("mc.backtesting")}
           </button>
           <button type="button" className="rounded-sm border border-terminal-border px-2 py-2 text-xs text-terminal-text hover:border-terminal-accent" onClick={() => navigate("/equity/launchpad")}>
-            Launchpad
+            {t("mc.launchpad")}
           </button>
         </div>
       </MissionControlPanel>
 
-      <MissionControlPanel title="System Snapshot">
+      <MissionControlPanel title={t("mc.systemSnapshot")}>
         <div className="space-y-2 text-xs">
           <div className="rounded-sm border border-terminal-border/80 px-2 py-1.5">
             <span className="text-terminal-muted">Data Mode</span>

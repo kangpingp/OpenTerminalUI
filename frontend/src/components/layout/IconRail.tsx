@@ -3,8 +3,9 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, ChevronDown, Star, StarOff } from "lucide-react";
 
 import { AuthContextRef } from "../../contexts/AuthContext";
-import { NAV_SECTIONS, PINNED_DEFAULT, findNavItem, type NavItem, type NavSection } from "./navConfig";
+import { PINNED_DEFAULT, findNavItem, getLocalizedNavSections, type NavItem, type NavSection } from "./navConfig";
 import { useNavigationStore } from "../../store/navigationStore";
+import { useI18n } from "../../i18n/useI18n";
 
 const BRAND_ICON_SRC = "/favicon.png";
 
@@ -39,6 +40,16 @@ export function IconRail() {
   const user = authCtx?.user ?? null;
   const location = useLocation();
   const { pathname } = location;
+  const { t } = useI18n();
+  const localizedSections = useMemo(() => getLocalizedNavSections(t), [t]);
+  const localizedById = useMemo(() => {
+    const map = new Map<string, NavItem>();
+    for (const section of localizedSections) {
+      for (const item of section.items) map.set(item.id, item);
+    }
+    return map;
+  }, [localizedSections]);
+  const labelOf = (item: NavItem) => localizedById.get(item.id)?.label ?? item.label;
 
   /* ---- expanded state ---- */
   const [expanded, setExpanded] = useState(() => {
@@ -185,14 +196,14 @@ export function IconRail() {
       <aside
         ref={railRef}
         className="hidden h-full w-16 shrink-0 border-r border-terminal-border bg-terminal-panel md:flex md:flex-col"
-        aria-label="Primary icon rail"
+        aria-label={t("nav.primaryRail")}
         onKeyDown={onRailKeyDown}
       >
         <div className="flex items-center justify-center border-b border-terminal-border px-2 py-2">
           <img src={BRAND_ICON_SRC} alt="OpenTerminalUI" className="h-7 w-7 max-w-full object-contain" />
         </div>
         <nav className="flex-1 space-y-1 overflow-auto p-2">
-          {NAV_SECTIONS.flatMap((s) => s.items)
+          {localizedSections.flatMap((s) => s.items)
             .filter((item) => pinned.includes(item.id))
             .map((item) => (
               <NavLink
@@ -216,7 +227,7 @@ export function IconRail() {
             ))}
           <button
             type="button"
-            aria-label="Expand navigation"
+            aria-label={t("nav.expand")}
             onClick={() => setExpanded(true)}
             className="flex w-full flex-col items-center gap-1 rounded-sm border border-transparent px-1.5 py-2 text-center outline-none transition-colors focus-visible:border-terminal-accent focus-visible:text-terminal-accent text-terminal-muted hover:border-terminal-border hover:text-terminal-text"
           >
@@ -259,7 +270,7 @@ export function IconRail() {
     <aside
       ref={railRef}
       className="hidden h-full w-[208px] shrink-0 border-r border-terminal-border bg-terminal-panel md:flex md:flex-col"
-      aria-label="Primary icon rail"
+      aria-label={t("nav.primaryRail")}
       onKeyDown={onRailKeyDown}
     >
       {/* header */}
@@ -267,7 +278,7 @@ export function IconRail() {
         <img src={BRAND_ICON_SRC} alt="OpenTerminalUI" className="h-7 w-7 max-w-full object-contain" />
         <button
           type="button"
-          aria-label="Collapse navigation"
+          aria-label={t("nav.collapse")}
           onClick={() => setExpanded(false)}
           className="rounded-sm p-1 text-terminal-muted hover:text-terminal-text"
         >
@@ -289,7 +300,7 @@ export function IconRail() {
                   key={`recent-${ri.item.id}-${i}`}
                 data-nav-idx=""
                   to={ri.item.to}
-                  aria-label={ri.item.label}
+                  aria-label={labelOf(ri.item)}
                   className={({ isActive: active }) =>
                     [
                       "flex items-center gap-2 rounded-sm px-1.5 py-1.5 text-left outline-none",
@@ -303,7 +314,7 @@ export function IconRail() {
                   <span className="inline-block w-8 shrink-0 text-center text-[10px] font-mono text-terminal-accent/70">
                     {ri.item.glyph}
                   </span>
-                  <span className="truncate text-[11px]">{ri.item.label}</span>
+                  <span className="truncate text-[11px]">{labelOf(ri.item)}</span>
                 </NavLink>
               ))}
             </div>
@@ -313,10 +324,10 @@ export function IconRail() {
         {/* Pinned section */}
         <div className="mb-2">
           <div className="mb-1 px-1.5 pb-1 text-[10px] font-semibold uppercase tracking-wider text-terminal-muted">
-            Pinned
+            {t("nav.pinned")}
           </div>
           <div className="space-y-0.5">
-            {NAV_SECTIONS.flatMap((s) => s.items)
+            {localizedSections.flatMap((s) => s.items)
               .filter((item) => pinned.includes(item.id))
               .map((item) => {
                 return (
@@ -342,7 +353,7 @@ export function IconRail() {
                     </NavLink>
                     <button
                       type="button"
-                      aria-label={isPinned(item.id) ? "Unpin" : "Pin"}
+                      aria-label={isPinned(item.id) ? t("nav.unpin") : t("nav.pin")}
                       onClick={() => handlePinToggle(item.id)}
                       className="ml-auto p-1 text-terminal-muted hover:text-terminal-accent"
                     >
@@ -359,7 +370,7 @@ export function IconRail() {
         </div>
 
         {/* Sections */}
-        {NAV_SECTIONS.map((section) => {
+        {localizedSections.map((section) => {
           const isOpen = sectionsOpen[section.id] ?? (section.id === currentSectionId);
           return (
             <div key={section.id} className="mb-2">
@@ -406,7 +417,7 @@ export function IconRail() {
                         </NavLink>
                         <button
                           type="button"
-                          aria-label={isPinned(item.id) ? "Unpin" : "Pin"}
+                          aria-label={isPinned(item.id) ? t("nav.unpin") : t("nav.pin")}
                           onClick={() => handlePinToggle(item.id)}
                           className="ml-auto p-1 text-terminal-muted hover:text-terminal-accent"
                         >

@@ -7,6 +7,7 @@ import { useAlertsStore } from "../../store/alertsStore";
 import { useQuotesStore } from "../../realtime/useQuotesStream";
 import { useProvidersStatus } from "../../api/providers";
 import { useAgentStore } from "../../agent/agentStore";
+import { useI18n } from "../../i18n/useI18n";
 
 function formatZone(now: Date, timeZone: string) {
   return now.toLocaleTimeString([], {
@@ -41,6 +42,7 @@ function Dot({ tone }: { tone: "green" | "yellow" | "red" | "gray" }) {
 }
 
 export function MarketStatusBar(_props: { tickerOverride?: string | null } = {}) {
+  const { t } = useI18n();
   const agentOpen = useAgentStore((st) => st.open);
   const toggleAgent = useAgentStore((st) => st.toggleOpen);
   const { data: marketStatus } = useMarketStatus();
@@ -132,8 +134,8 @@ export function MarketStatusBar(_props: { tickerOverride?: string | null } = {})
           <button
             type="button"
             onClick={() => navigate("/equity/settings?section=providers")}
-            title="Data providers — open Settings"
-            aria-label="Data providers — open Settings"
+            title={t("settings.dataProviders")}
+            aria-label={t("settings.dataProviders")}
             className="inline-flex items-center gap-1"
           >
             {providersLoading || providersError || !providersData ? (

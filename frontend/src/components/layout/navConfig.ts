@@ -181,3 +181,17 @@ export function findNavItem(pathname: string): { section: NavSection; item: NavI
 
   return bestMatch;
 }
+
+export type TranslateLike = (key: string) => string;
+
+/** Return NAV_SECTIONS with labels resolved through t(); falls back to English labels. */
+export function getLocalizedNavSections(t: TranslateLike): NavSection[] {
+  return NAV_SECTIONS.map((section) => ({
+    ...section,
+    label: t(`nav.section.${section.id}`) || section.label,
+    items: section.items.map((item) => ({
+      ...item,
+      label: t(`nav.item.${item.id}`) || item.label,
+    })),
+  }));
+}
